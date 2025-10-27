@@ -54,11 +54,14 @@ const queue = new TaskQueue<TrustedEvent>({
     if (newWriteRelays.length > 0) {
       console.log("Synchronizing events to new write relays", {pubkey, relays: newWriteRelays})
 
-      const events = await pull({
-        filters: writeFilters,
-        relays: previousWriteRelays,
-        events: repository.query(writeFilters).filter(isSignedEvent),
-      })
+      const events = uniqBy(
+        e => e.id,
+        await pull({
+          filters: writeFilters,
+          relays: previousWriteRelays,
+          events: repository.query(writeFilters).filter(isSignedEvent),
+        })
+      )
 
       console.log(`${events.length} unsynchronized events found`, {pubkey, relays: newWriteRelays})
 
@@ -78,11 +81,14 @@ const queue = new TaskQueue<TrustedEvent>({
     if (newReadRelays.length > 0) {
       console.log("Synchronizing events to new read relays", {pubkey, relays: newReadRelays})
 
-      const events = await pull({
-        filters: readFilters,
-        relays: previousReadRelays,
-        events: repository.query(writeFilters).filter(isSignedEvent),
-      })
+      const events = uniqBy(
+        e => e.id,
+        await pull({
+          filters: readFilters,
+          relays: previousReadRelays,
+          events: repository.query(writeFilters).filter(isSignedEvent),
+        })
+      )
 
       console.log(`${events.length} unsynchronized events found`, {pubkey, relays: newWriteRelays})
 
